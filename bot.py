@@ -1,4 +1,18 @@
 import logging
+import os
+
+from dotenv import load_dotenv
+load_dotenv()   # 👈 دا باید تر MongoClient مخکې وي
+
+from pymongo import MongoClient
+
+mongo_url = os.getenv("MONGO_URL")
+if not mongo_url:
+    raise RuntimeError("MONGO_URL is not set")
+
+client = MongoClient(mongo_url)
+
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -69,4 +83,12 @@ def main():
     app.add_handler(CallbackQueryHandler(review_action))
 
     print("✅ Review Bot is running...")
+    app.run_polling()
+
+if __name__ == "__main__":
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+
+    print("🤖 Bot is running...")
     app.run_polling()
