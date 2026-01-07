@@ -2,17 +2,9 @@ import logging
 import os
 
 from dotenv import load_dotenv
-load_dotenv()   # 👈 دا باید تر MongoClient مخکې وي
+load_dotenv()
 
 from pymongo import MongoClient
-
-mongo_url = os.getenv("MONGO_URL")
-if not mongo_url:
-    raise RuntimeError("MONGO_URL is not set")
-
-client = MongoClient(mongo_url)
-
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -23,17 +15,33 @@ from telegram.ext import (
     filters,
 )
 
+# ================== ENV ==================
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+MONGO_URL = os.getenv("MONGO_URL")
+
+if not BOT_TOKEN:
+    raise RuntimeError("BOT_TOKEN is not set")
+
+if not MONGO_URL:
+    raise RuntimeError("MONGO_URL is not set")
+
+ADMIN_ID = 7793192501
+
+# ================== Mongo ==================
+
+client = MongoClient(MONGO_URL)
+
+# ================== Logging ==================
+
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-# ================== تنظیمات ==================
-BOT_TOKEN = "8004049260:AAEHM2Yop8qTBtzS3qJ6oqJ7gsbLoshLrAA"
-ADMIN_ID = 7793192501
-# ============================================
-
 user_payments = {}
+
+# ================== Handlers ==================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -75,6 +83,8 @@ async def review_action(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(user_id, "❌ ستاسو تادیه رد شوه.")
         await query.edit_message_text("❌ Rejected")
 
+# ================== Main ==================
+
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -82,13 +92,8 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_payment))
     app.add_handler(CallbackQueryHandler(review_action))
 
-    print("✅ Review Bot is running...")
+    print("🤖 Review Bot is running...")
     app.run_polling()
 
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-
-    print("🤖 Bot is running...")
-    app.run_polling()
+    main()
