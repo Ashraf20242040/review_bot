@@ -1,8 +1,6 @@
 import logging
 import os
 
-from dotenv import load_dotenv
-load_dotenv()
 
 from pymongo import MongoClient
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
