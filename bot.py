@@ -1,7 +1,4 @@
 import os
-import logging
-from dotenv import load_dotenv
-from pymongo import MongoClient
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,31 +6,33 @@ from telegram.ext import (
     ContextTypes,
 )
 
-load_dotenv()
-
+# Telegram Bot Token (from environment variable)
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-MONGO_URL = os.getenv("MONGO_URL")
 
 if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN not set")
+    raise RuntimeError("BOT_TOKEN is not set in environment variables")
 
-if not MONGO_URL:
-    raise RuntimeError("MONGO_URL not set")
-
-client = MongoClient(MONGO_URL)
-
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
-
+# /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ Bot is running!")
+    await update.message.reply_text(
+        "🤖 Bot is running successfully!\n"
+        "Everything is working fine ✅"
+    )
+
+# /ping command (optional test)
+async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🏓 pong")
 
 def main():
+    # Build application (NO Updater)
     app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    # Add handlers
     app.add_handler(CommandHandler("start", start))
-    app.run_polling()
+    app.add_handler(CommandHandler("ping", ping))
+
+    # Start bot
+    app.run_polling(close_loop=False)
 
 if __name__ == "__main__":
     main()
